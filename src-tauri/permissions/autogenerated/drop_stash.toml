@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-drop-stash"
+description = "Enables the drop_stash command without any pre-configured scope."
+commands.allow = ["drop_stash"]
+
+[[permission]]
+identifier = "deny-drop-stash"
+description = "Denies the drop_stash command without any pre-configured scope."
+commands.deny = ["drop_stash"]

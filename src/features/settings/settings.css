@@ -1,0 +1,192 @@
+/* Settings screen */
+.settings {
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--bg);
+}
+.settings-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
+}
+.settings-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.settings-head h1 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 720;
+  letter-spacing: -0.02em;
+}
+.save-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.settings .banner {
+  border: 0;
+  border-radius: var(--radius-m);
+  margin: 8px 0;
+}
+.settings-section {
+  margin-top: 22px;
+}
+.settings-section .section {
+  margin-top: 0;
+}
+.section-hint {
+  margin: -2px 0 8px;
+  font-size: 12px;
+}
+
+/* A bordered group of settings, one row each. */
+.setting-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+}
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.setting:last-child {
+  border-bottom: 0;
+}
+.setting-text {
+  min-width: 0;
+  max-width: 460px;
+}
+.setting-text .quiet {
+  font-size: 12px;
+}
+.field-error {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 560;
+}
+
+/* Folder lists */
+.folders li {
+  padding-right: 4px;
+}
+.folders .icon {
+  color: var(--text-3);
+}
+.folders-empty {
+  padding: 10px 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+  font-size: 12.5px;
+}
+.folder-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  min-width: 0;
+}
+.folder-actions .note {
+  min-width: 0;
+  font-size: 12px;
+}
+.btn.small-btn {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+/* Inputs */
+.select,
+.field {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12.5px;
+}
+.select:focus-visible,
+.field:focus-visible {
+  outline-offset: 1px;
+}
+.field[aria-invalid='true'] {
+  border-color: var(--risk);
+}
+.days {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.days .field {
+  width: 64px;
+  text-align: right;
+  font-size: 12px;
+}
+
+/* Switch: a button with role="switch"; the words say the state too. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 560;
+}
+.switch-track {
+  position: relative;
+  width: 30px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  transition: background-color 120ms var(--ease);
+}
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+  transition: transform 120ms var(--ease);
+}
+.switch[aria-checked='true'] .switch-track {
+  background: var(--ink);
+  box-shadow: none;
+}
+.switch[aria-checked='true'] .switch-thumb {
+  transform: translateX(12px);
+  background: var(--on-ink);
+}
+.switch[aria-checked='true'] {
+  color: var(--text);
+}
+.switch-text {
+  min-width: 22px;
+  text-align: left;
+}
+
+@media (max-width: 1199px) {
+  .settings-inner {
+    padding-top: 16px;
+  }
+}

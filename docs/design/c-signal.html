@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Repowatch mock C: Signal strip</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="shared/base.css" />
+    <style>
+      body {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        height: 100vh;
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 52px;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .brand {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: -0.02em;
+      }
+      .brand span {
+        color: var(--text-3);
+      }
+      .spacer {
+        flex: 1;
+      }
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 360px;
+        height: 30px;
+        padding: 0 10px;
+        border-bottom: 1px solid var(--border-strong);
+        color: var(--text-3);
+      }
+      .search span {
+        flex: 1;
+      }
+      kbd {
+        font-size: 11px;
+        color: var(--text-2);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 30px;
+        padding: 0 12px;
+        border-radius: var(--radius-s);
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        font-weight: 600;
+        font-size: 12.5px;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .btn.ink {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--on-ink);
+      }
+      .btn.sq {
+        width: 30px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      /* Overview signal: one bar for the whole machine */
+      .overview {
+        padding: 18px 24px 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+      }
+      .overview .line {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .overview h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 720;
+        letter-spacing: -0.02em;
+      }
+      .overview .meta {
+        color: var(--text-2);
+      }
+      .bigbar {
+        display: flex;
+        gap: 3px;
+        height: 34px;
+      }
+      .bigbar button {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        padding: 0 10px;
+        border: 0;
+        border-top: 3px solid var(--c);
+        border-radius: 3px;
+        background: var(--t);
+        color: var(--x);
+        font-size: 12.5px;
+        font-weight: 650;
+        white-space: nowrap;
+        min-width: fit-content;
+        cursor: pointer;
+      }
+      .bigbar .n {
+        font-family: var(--font-mono);
+      }
+
+      /* Repo rows */
+      .rows {
+        overflow-y: auto;
+        min-height: 0;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 250px minmax(0, 1fr) 200px 20px;
+        align-items: center;
+        gap: 18px;
+        height: 48px;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .row[aria-current='true'] {
+        background: var(--surface-2);
+      }
+      .id {
+        min-width: 0;
+      }
+      .id .name {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .id .branch {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--text-3);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .strip {
+        display: flex;
+        gap: 2px;
+        height: 26px;
+        min-width: 0;
+      }
+      .seg {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-width: 0;
+        padding: 0 8px;
+        border-top: 3px solid var(--c);
+        border-radius: 3px;
+        background: var(--t);
+        color: var(--x);
+        font-size: 12px;
+        font-weight: 620;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .seg .icon {
+        width: 12px;
+        height: 12px;
+      }
+      .seg .short {
+        display: none;
+      }
+      .seg.clean {
+        flex: 1;
+        border-top-width: 1px;
+        background: transparent;
+      }
+      .last {
+        font-size: 12px;
+        color: var(--text-2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .last .ago {
+        display: block;
+        color: var(--text-3);
+      }
+      .row > .icon {
+        color: var(--text-3);
+      }
+
+      /* Detail page */
+      .page {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 0;
+      }
+      .page-head {
+        padding: 14px 24px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+      }
+      .crumb {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 0;
+        background: none;
+        padding: 0;
+        color: var(--text-2);
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .ph {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 8px;
+      }
+      .ph h1 {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .ph .ref {
+        font-family: var(--font-mono);
+        color: var(--text-2);
+      }
+      .page-head .strip {
+        height: 30px;
+        margin-top: 12px;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr) 280px;
+        min-height: 0;
+      }
+      .col {
+        min-height: 0;
+        overflow: auto;
+        border-right: 1px solid var(--border);
+      }
+      .col:last-child {
+        border-right: 0;
+        background: var(--bg);
+      }
+      .col h2 {
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+        padding: 14px 16px 6px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-2);
+      }
+      .col h2 .n {
+        font-family: var(--font-mono);
+        font-weight: 400;
+      }
+      .file {
+        display: grid;
+        grid-template-columns: 16px minmax(0, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+        height: 30px;
+        padding: 0 16px;
+      }
+      .file[aria-selected='true'] {
+        background: var(--surface-3);
+      }
+      .file .st {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        color: var(--change-text);
+      }
+      .file .fp {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file .dir {
+        color: var(--text-3);
+      }
+      .delta {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+      }
+      .a {
+        color: var(--clean-text);
+      }
+      .d {
+        color: var(--risk-text);
+      }
+      .commit {
+        margin: 12px 16px;
+        display: grid;
+        gap: 8px;
+      }
+      .commit .field {
+        min-height: 60px;
+        padding: 8px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-s);
+      }
+      .hunk {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 16px;
+        background: var(--diff-hunk);
+        color: var(--text-2);
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+      }
+      .hunk span {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hunk .btn {
+        height: 22px;
+        font-family: var(--font-ui);
+        font-size: 11.5px;
+      }
+      .dl {
+        display: grid;
+        grid-template-columns: 42px 42px 16px minmax(0, 1fr);
+        font-family: var(--font-mono);
+        font-variant-ligatures: none;
+        font-size: 12px;
+        line-height: 21px;
+      }
+      .dl .ln {
+        text-align: right;
+        padding-right: 8px;
+        color: var(--text-3);
+      }
+      .dl .tx {
+        white-space: pre;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .dl.add {
+        background: var(--diff-add);
+      }
+      .dl.del {
+        background: var(--diff-del);
+      }
+      .dl.add .sg {
+        color: var(--clean-text);
+      }
+      .dl.del .sg {
+        color: var(--risk-text);
+      }
+      .item {
+        margin: 0 12px 8px;
+        padding: 10px 12px;
+        border-radius: var(--radius-m);
+        background: var(--surface);
+        border: 1px solid var(--border);
+      }
+      .item .t {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .item .s {
+        margin-top: 2px;
+        font-size: 12px;
+        color: var(--text-2);
+      }
+      .item .btn {
+        margin-top: 8px;
+        height: 26px;
+      }
+
+      @media (max-width: 1200px) {
+        .row {
+          grid-template-columns: 200px minmax(0, 1fr) 20px;
+        }
+        .row .last {
+          display: none;
+        }
+        .seg .long {
+          display: none;
+        }
+        .seg .short {
+          display: inline;
+        }
+        .search {
+          width: 220px;
+        }
+        .cols {
+          grid-template-columns: 260px minmax(0, 1fr);
+        }
+        .cols .col:last-child {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <span class="brand">repo<span>watch</span></span>
+      <span class="spacer"></span>
+      <div class="search" role="search"><span id="si"></span><span>Search repositories</span><kbd>Ctrl K</kbd></div>
+      <button class="btn" type="button" id="rescan"></button>
+      <button class="btn sq" type="button" aria-label="Settings" id="settings"></button>
+    </header>
+    <div id="second"></div>
+    <main id="main" style="min-height: 0; display: grid"></main>
+
+    <script src="shared/data.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        const { icon, esc, issues, sorted, summary, CATEGORIES, detail } = RW;
+        document.getElementById('si').outerHTML = icon('search');
+        document.getElementById('rescan').innerHTML = icon('refresh') + 'Rescan';
+        document.getElementById('settings').innerHTML = icon('settings');
+        const vars = (cat) => `--c: var(--${cat}); --t: var(--${cat}-tint); --x: var(--${cat}-text)`;
+        function strip(r) {
+          const list = issues(r);
+          if (!list.length) {
+            return `<div class="strip"><span class="seg clean" style="${vars('clean')}; background: transparent">${icon('check')}Clean</span></div>`;
+          }
+          return (
+            '<div class="strip">' +
+            list
+              .map((i) => {
+                const weight = (i.cat === 'risk' ? 3 : 1) + Math.log2(1 + (i.n || 1));
+                const short = i.n ? String(i.n) : '';
+                return (
+                  `<span class="seg" style="${vars(i.cat)}; flex: ${weight.toFixed(2)} 1 0" title="${esc(i.text)}">${icon(RW.ISSUE_ICON[i.key])}` +
+                  `<span class="long">${esc(i.text)}</span><span class="short">${short}</span><span class="sr-only">${esc(i.text)}</span></span>`
+                );
+              })
+              .join('') +
+            '</div>'
+          );
+        }
+
+        if (RW.view() === 'dashboard') {
+          const sum = summary();
+          const bar = Object.keys(CATEGORIES)
+            .filter((c) => sum.counts[c])
+            .map(
+              (c) =>
+                `<button type="button" style="${vars(c)}; flex: ${sum.counts[c]} 1 0">${CATEGORIES[c].label}<span class="n">${sum.counts[c]}</span></button>`,
+            )
+            .join('');
+          document.getElementById('second').innerHTML =
+            '<section class="overview" aria-label="Overview"><div class="line">' +
+            `<h1>${sum.attention} of ${sum.total} repositories need attention</h1><span class="meta">3 roots · scanned 12 s ago · watching</span></div>` +
+            `<div class="bigbar">${bar}</div></section>`;
+          document.getElementById('main').innerHTML =
+            '<section class="rows" aria-label="Repositories">' +
+            sorted()
+              .map((r) => {
+                const branch = r.detached ? 'HEAD 41d7e09 (detached)' : r.branch + (r.worktreeOf ? ' · worktree' : '');
+                return (
+                  `<div class="row" aria-current="${r.name === 'forja' && !r.worktreeOf}"><div class="id"><div class="name">${esc(r.name)}</div><div class="branch">${esc(branch)}</div></div>` +
+                  strip(r) +
+                  `<div class="last">${esc(r.last.msg)}<span class="ago">${esc(r.last.ago)}</span></div>${icon('chevron')}</div>`
+                );
+              })
+              .join('') +
+            '</section>';
+          return;
+        }
+
+        const r = RW.repos[0];
+        const fileRow = (f) => {
+          const parts = f.path.split('/');
+          const base = parts.pop();
+          return (
+            `<div class="file" aria-selected="${f.path === detail.diff.file}"><span class="st">${f.status}</span>` +
+            `<span class="fp"><span class="dir">${esc(parts.join('/'))}/</span>${esc(base)}</span>` +
+            `<span class="delta"><span class="a">+${f.add}</span> <span class="d">−${f.del}</span></span></div>`
+          );
+        };
+        let diff = '';
+        detail.diff.hunks.forEach((h) => {
+          diff += `<div class="hunk"><span>${esc(h.header)}</span><button class="btn" type="button">Stage hunk</button></div>`;
+          h.lines.forEach(([s, o, n, t]) => {
+            const cls = s === '+' ? ' add' : s === '-' ? ' del' : '';
+            diff += `<div class="dl${cls}"><span class="ln">${o ?? ''}</span><span class="ln">${n ?? ''}</span><span class="sg">${s === '-' ? '−' : s === '+' ? '+' : ''}</span><span class="tx">${esc(t)}</span></div>`;
+          });
+        });
+        const side =
+          '<h2>Unmerged branches<span class="n">2</span></h2>' +
+          detail.branches
+            .filter((b) => !b.merged)
+            .map((b) => `<div class="item"><div class="t">${esc(b.name)}</div><div class="s">${b.ahead} commits not in main · ${esc(b.ago)}</div></div>`)
+            .join('') +
+          '<h2>Stashes<span class="n">1</span></h2>' +
+          detail.stashes.map((s) => `<div class="item"><div class="t">${esc(s.ref)}</div><div class="s">${esc(s.msg)}</div><button class="btn" type="button">Apply</button></div>`).join('') +
+          '<h2>Lost commits<span class="n">2</span></h2>' +
+          detail.lost
+            .map((l) => `<div class="item"><div class="t">${esc(l.hash)} ${esc(l.msg)}</div><div class="s">${esc(l.source)} · ${esc(l.ago)}</div><button class="btn" type="button">Recover to branch</button></div>`)
+            .join('');
+        document.getElementById('main').innerHTML =
+          '<section class="page" aria-label="forja">' +
+          `<div class="page-head"><button class="crumb" type="button">${icon('back')}All repositories</button>` +
+          `<div class="ph"><h1>${esc(r.name)}</h1><span class="ref">main → origin/main</span><span class="spacer"></span>` +
+          `<button class="btn" type="button">${icon('fetch')}Fetch</button><button class="btn" type="button">${icon('down')}Pull</button><button class="btn ink" type="button">${icon('up')}Push 2</button>` +
+          `<button class="btn sq" type="button" aria-label="Open in VS Code">${icon('code')}</button><button class="btn sq" type="button" aria-label="Open in terminal">${icon('terminal')}</button><button class="btn sq" type="button" aria-label="Open in Explorer">${icon('folder')}</button></div>` +
+          strip(r) +
+          '</div><div class="cols">' +
+          '<div class="col"><h2>Staged<span class="n">2</span></h2>' +
+          detail.files.filter((f) => f.staged).map(fileRow).join('') +
+          '<h2>Changes<span class="n">4</span></h2>' +
+          detail.files.filter((f) => !f.staged).map(fileRow).join('') +
+          `<div class="commit"><div class="field">Pass review timeout and snapshot to reviewers</div><button class="btn ink" type="button">${icon('check')}Commit 2 files</button></div></div>` +
+          `<div class="col" aria-label="Diff">${diff}</div>` +
+          `<div class="col">${side}</div></div></section>`;
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,230 @@
+/* Global elements and shared primitives (DESIGN.md Components, Focus, Motion). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum';
+  overflow: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.mono,
+code,
+kbd {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-variant-ligatures: none;
+}
+
+kbd {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+/* Thin scrollbars in the theme's colours: WebView2 on Windows otherwise draws
+   the classic bars with arrow buttons. The thumb keeps about 3:1 against the
+   surfaces in both themes. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-3) 65%, transparent) transparent;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--dot, var(--text-3));
+}
+
+/* Buttons: default, ghost, ink (primary), icon-only. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 560;
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition:
+    background-color 120ms var(--ease),
+    border-color 120ms var(--ease);
+}
+.btn:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.btn:disabled {
+  color: var(--text-3);
+}
+.btn.ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-2);
+}
+.btn.ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.btn.ink {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-ink);
+}
+.btn.ink:hover:not(:disabled) {
+  background: var(--ink);
+  opacity: 0.9;
+}
+.btn.icon-only {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+}
+
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+.link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Segmented control (two to three exclusive toggle buttons). */
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--radius-m);
+  background: var(--surface-2);
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-s);
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  transition: background-color 120ms var(--ease);
+}
+.seg button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+}
+.seg button:focus-visible {
+  outline-offset: 0;
+}
+
+/* Category text colours (DESIGN.md state colours). */
+.t-risk {
+  color: var(--risk-text);
+}
+.t-change {
+  color: var(--change-text);
+}
+.t-sync {
+  color: var(--sync-text);
+}
+.t-branch {
+  color: var(--branch-text);
+}
+.t-clean {
+  color: var(--clean-text);
+}
+
+/* Reduced motion: no transitions at all (a 0.01 ms one would still animate
+   every property, since transition-property defaults to all), animations end at once. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

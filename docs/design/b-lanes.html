@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Repowatch mock B: Triage lanes</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="shared/base.css" />
+    <style>
+      body {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        height: 100vh;
+        overflow: hidden;
+        font-size: 13.5px;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 56px;
+        padding: 0 20px;
+      }
+      .brand {
+        font-size: 17px;
+        font-weight: 760;
+        letter-spacing: -0.03em;
+      }
+      .tally {
+        color: var(--text-2);
+        font-size: 13px;
+      }
+      .tally b {
+        color: var(--text);
+        font-weight: 650;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 300px;
+        height: 32px;
+        padding: 0 10px;
+        border-radius: 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-3);
+      }
+      .search span {
+        flex: 1;
+      }
+      kbd {
+        font-size: 11px;
+        padding: 0 5px;
+        border-radius: var(--radius-s);
+        border: 1px solid var(--border-strong);
+        color: var(--text-2);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 16px;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        font-weight: 600;
+        font-size: 13px;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .btn.round {
+        width: 32px;
+        padding: 0;
+        justify-content: center;
+      }
+      .btn.ink {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--on-ink);
+      }
+      .board {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) 210px;
+        gap: 12px;
+        padding: 4px 20px 20px;
+        min-height: 0;
+      }
+      .lane {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 0;
+        border-radius: var(--radius-l);
+        background: var(--surface-2);
+      }
+      .lane-head {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        padding: 12px 14px 4px;
+      }
+      .lane-head h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 720;
+        letter-spacing: -0.01em;
+      }
+      .lane-head .n {
+        font-family: var(--font-mono);
+        color: var(--text-2);
+      }
+      .lane-head .why {
+        margin-left: auto;
+        font-size: 12px;
+        color: var(--text-2);
+      }
+      .lane-bar {
+        height: 3px;
+        margin: 6px 14px 0;
+        border-radius: 2px;
+        background: var(--c);
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+        gap: 8px;
+        padding: 10px;
+        overflow-y: auto;
+        min-height: 0;
+      }
+      .card {
+        padding: 10px 12px;
+        border-radius: var(--radius-m);
+        background: var(--surface);
+        box-shadow: 0 1px 0 var(--border), 0 0 0 1px var(--border);
+      }
+      .card[aria-current='true'] {
+        box-shadow: 0 0 0 2px var(--ink);
+      }
+      .card .title {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-width: 0;
+      }
+      .card .name {
+        font-weight: 680;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .card .branch {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--text-3);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 8px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 22px;
+        max-width: 100%;
+        padding: 2px 7px;
+        border-radius: 11px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+      .tag .icon {
+        width: 12px;
+        height: 12px;
+      }
+      .tag-risk {
+        background: var(--risk-tint);
+        color: var(--risk-text);
+      }
+      .tag-change {
+        background: var(--change-tint);
+        color: var(--change-text);
+      }
+      .tag-sync {
+        background: var(--sync-tint);
+        color: var(--sync-text);
+      }
+      .tag-branch {
+        background: var(--branch-tint);
+        color: var(--branch-text);
+      }
+      .card .last {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--text-2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .clean-list {
+        margin: 0;
+        padding: 6px 14px 14px;
+        list-style: none;
+        overflow-y: auto;
+      }
+      .clean-list li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 28px;
+        border-bottom: 1px solid var(--border);
+        font-size: 12.5px;
+      }
+      .clean-list .icon {
+        color: var(--clean-text);
+      }
+
+      /* Detail drawer */
+      .scrim {
+        position: fixed;
+        inset: 0;
+        background: rgb(14 16 20 / 30%);
+      }
+      .drawer {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        bottom: 8px;
+        width: min(700px, calc(100vw - 120px));
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: var(--shadow-pop);
+        overflow: hidden;
+      }
+      .d-head {
+        padding: 18px 20px 12px;
+      }
+      .d-head .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .d-head h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 760;
+        letter-spacing: -0.03em;
+      }
+      .d-head .path {
+        margin-top: 2px;
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--text-3);
+      }
+      .d-head .chips {
+        margin-top: 10px;
+      }
+      .d-head .acts {
+        display: flex;
+        gap: 6px;
+        margin-top: 14px;
+      }
+      .pills {
+        display: flex;
+        gap: 4px;
+        padding: 0 20px 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .pill {
+        height: 28px;
+        padding: 0 12px;
+        border-radius: 14px;
+        border: 0;
+        background: transparent;
+        color: var(--text-2);
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .pill[aria-selected='true'] {
+        background: var(--surface-3);
+        color: var(--text);
+      }
+      .d-body {
+        min-height: 0;
+        overflow: auto;
+        padding: 12px 20px;
+      }
+      .file {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: 8px;
+        height: 32px;
+        padding: 0 8px;
+        border-radius: var(--radius-m);
+      }
+      .file[aria-expanded='true'] {
+        background: var(--surface-2);
+      }
+      .st {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        text-align: center;
+        color: var(--change-text);
+      }
+      .fp {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .fp .dir {
+        color: var(--text-3);
+      }
+      .delta {
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+      .a {
+        color: var(--clean-text);
+      }
+      .d {
+        color: var(--risk-text);
+      }
+      .check {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 1.5px solid var(--border-strong);
+        display: grid;
+        place-items: center;
+      }
+      .check.on {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--on-ink);
+      }
+      .check .icon {
+        width: 11px;
+        height: 11px;
+        stroke-width: 2.2;
+      }
+      .diff {
+        margin: 6px 0 10px 28px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-m);
+        overflow: hidden;
+      }
+      .hunk {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        background: var(--diff-hunk);
+        color: var(--text-2);
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+      }
+      .hunk span {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hunk .btn {
+        height: 24px;
+        font-family: var(--font-ui);
+        font-size: 12px;
+      }
+      .dl {
+        display: grid;
+        grid-template-columns: 40px 16px minmax(0, 1fr);
+        font-family: var(--font-mono);
+        font-variant-ligatures: none;
+        font-size: 12px;
+        line-height: 20px;
+      }
+      .dl .ln {
+        text-align: right;
+        padding-right: 6px;
+        color: var(--text-3);
+      }
+      .dl .tx {
+        white-space: pre;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .dl.add {
+        background: var(--diff-add);
+      }
+      .dl.del {
+        background: var(--diff-del);
+      }
+      .dl.add .sg {
+        color: var(--clean-text);
+      }
+      .dl.del .sg {
+        color: var(--risk-text);
+      }
+      .d-foot {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 12px 20px;
+        border-top: 1px solid var(--border);
+      }
+      .d-foot .field {
+        flex: 1;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        border-radius: 17px;
+        border: 1px solid var(--border-strong);
+        background: var(--bg);
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      @media (max-width: 1200px) {
+        .board {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-rows: 1fr auto;
+        }
+        .lane.clean {
+          grid-column: 1 / -1;
+          grid-template-rows: auto;
+          grid-template-columns: auto 1fr;
+          align-items: center;
+        }
+        .lane.clean .lane-bar {
+          display: none;
+        }
+        .clean-list {
+          display: flex;
+          flex-wrap: wrap;
+          column-gap: 14px;
+          row-gap: 2px;
+          padding: 8px 14px;
+        }
+        .clean-list li {
+          border: 0;
+          height: auto;
+          white-space: nowrap;
+        }
+        .search {
+          width: 220px;
+        }
+        .lane-head .why,
+        .card .last {
+          display: none;
+        }
+        .tally {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <span class="brand">Repowatch</span>
+      <span class="tally" id="tally"></span>
+      <span class="spacer"></span>
+      <div class="search" role="search"><span id="si"></span><span>Search</span><kbd>Ctrl K</kbd></div>
+      <button class="btn" type="button" id="rescan"></button>
+      <button class="btn round" type="button" aria-label="Settings" id="settings"></button>
+    </header>
+    <main class="board" id="board" aria-label="Repositories by what they need"></main>
+    <div id="detail"></div>
+
+    <script src="shared/data.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        const { icon, esc, issues, category, sorted, summary, detail } = RW;
+        const sum = summary();
+        document.getElementById('tally').innerHTML = `<b>${sum.attention}</b> of ${sum.total} repositories need you · scanned 12 s ago`;
+        document.getElementById('si').outerHTML = icon('search');
+        document.getElementById('rescan').innerHTML = icon('refresh') + 'Rescan';
+        document.getElementById('settings').innerHTML = icon('settings');
+
+        const LANES = [
+          { cat: 'risk', title: 'Fix first', why: 'Detached, conflicts, lost work' },
+          { cat: 'change', title: 'Commit', why: 'Uncommitted changes' },
+          { cat: 'sync', title: 'Push or pull', why: 'Out of sync with remote' },
+          { cat: 'branch', title: 'Tidy up', why: 'Branches and stashes' },
+        ];
+        const tag = (i) => `<span class="tag tag-${i.cat}">${icon(RW.ISSUE_ICON[i.key])}${esc(i.text)}</span>`;
+        function card(r) {
+          const branch = r.detached ? 'HEAD 41d7e09' : r.branch;
+          return (
+            `<article class="card" aria-current="${r.name === 'forja' && !r.worktreeOf}">` +
+            `<div class="title"><span class="name">${esc(r.name)}</span><span class="branch">${esc(branch)}</span></div>` +
+            `<div class="chips">${issues(r).map(tag).join('')}</div>` +
+            `<div class="last">${esc(r.last.msg)} · ${esc(r.last.ago)}</div></article>`
+          );
+        }
+        const all = sorted();
+        let html = LANES.map((l) => {
+          const items = all.filter((r) => category(r) === l.cat);
+          return (
+            `<section class="lane" aria-label="${l.title}"><div><div class="lane-head"><h2>${l.title}</h2><span class="n">${items.length}</span><span class="why">${l.why}</span></div>` +
+            `<div class="lane-bar" style="--c: var(--${l.cat})"></div></div>` +
+            `<div class="cards">${items.map(card).join('')}</div></section>`
+          );
+        }).join('');
+        const clean = all.filter((r) => category(r) === 'clean');
+        html +=
+          `<section class="lane clean" aria-label="Clean"><div><div class="lane-head"><h2>Clean</h2><span class="n">${clean.length}</span></div>` +
+          '<div class="lane-bar" style="--c: var(--clean)"></div></div>' +
+          `<ul class="clean-list">${clean.map((r) => `<li>${icon('check')}${esc(r.name)}</li>`).join('')}</ul></section>`;
+        document.getElementById('board').innerHTML = html;
+
+        if (RW.view() !== 'detail') return;
+        const r = RW.repos[0];
+        const files = detail.files
+          .map((f) => {
+            const parts = f.path.split('/');
+            const base = parts.pop();
+            const open = f.path === detail.diff.file;
+            let row =
+              `<div class="file" aria-expanded="${open}"><span class="check${f.staged ? ' on' : ''}" role="checkbox" aria-checked="${f.staged}" aria-label="Staged">${f.staged ? icon('check') : ''}</span>` +
+              `<span class="fp"><span class="dir">${esc(parts.join('/'))}/</span>${esc(base)}</span>` +
+              `<span class="st" title="${f.status === '?' ? 'Untracked' : 'Modified'}">${f.status}</span>` +
+              `<span class="delta"><span class="a">+${f.add}</span> <span class="d">−${f.del}</span></span></div>`;
+            if (open) {
+              row += '<div class="diff">';
+              detail.diff.hunks.forEach((h) => {
+                row += `<div class="hunk"><span>${esc(h.header)}</span><button class="btn" type="button">Stage hunk</button></div>`;
+                h.lines.forEach(([s, o, n, t]) => {
+                  const cls = s === '+' ? ' add' : s === '-' ? ' del' : '';
+                  row += `<div class="dl${cls}"><span class="ln">${n ?? o}</span><span class="sg">${s === '-' ? '−' : s === '+' ? '+' : ''}</span><span class="tx">${esc(t)}</span></div>`;
+                });
+              });
+              row += '</div>';
+            }
+            return row;
+          })
+          .join('');
+        document.getElementById('detail').innerHTML =
+          '<div class="scrim"></div><aside class="drawer" role="dialog" aria-label="forja">' +
+          `<div class="d-head"><div class="row"><h1>${esc(r.name)}</h1><span class="spacer"></span><button class="btn round" type="button" aria-label="Close">✕</button></div>` +
+          `<div class="path">${esc(r.path)} · main → origin/main</div>` +
+          `<div class="chips">${issues(r).map(tag).join('')}</div>` +
+          `<div class="acts"><button class="btn" type="button">${icon('fetch')}Fetch</button><button class="btn" type="button">${icon('down')}Pull</button>` +
+          `<button class="btn ink" type="button">${icon('up')}Push 2</button><span class="spacer"></span>` +
+          `<button class="btn round" type="button" aria-label="Open in VS Code">${icon('code')}</button><button class="btn round" type="button" aria-label="Open in terminal">${icon('terminal')}</button><button class="btn round" type="button" aria-label="Open in Explorer">${icon('folder')}</button></div></div>` +
+          '<div class="pills" role="tablist"><button class="pill" role="tab" aria-selected="true">Changes 6</button><button class="pill" role="tab" aria-selected="false">Branches 4</button><button class="pill" role="tab" aria-selected="false">Stashes 1</button><button class="pill" role="tab" aria-selected="false">Lost 2</button></div>' +
+          `<div class="d-body">${files}</div>` +
+          `<div class="d-foot"><span class="field">Pass review timeout and snapshot to reviewers</span><button class="btn ink" type="button">${icon('check')}Commit 2 files</button></div>` +
+          '</aside>';
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Repowatch mock A: Ledger</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="shared/base.css" />
+    <style>
+      body {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Title bar and toolbar */
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 44px;
+        padding: 0 12px 0 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 680;
+        letter-spacing: -0.01em;
+        font-size: 14px;
+      }
+      .brand-mark {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        background: var(--ink);
+        display: grid;
+        place-items: center;
+      }
+      .brand-mark i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--change);
+        box-shadow: 0 0 0 2px var(--ink);
+      }
+      .search {
+        flex: 0 1 420px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 28px;
+        padding: 0 8px;
+        border-radius: var(--radius-m);
+        background: var(--surface-2);
+        color: var(--text-3);
+        margin-left: 12px;
+      }
+      .search span {
+        flex: 1;
+      }
+      kbd {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        padding: 1px 5px;
+        border-radius: var(--radius-s);
+        border: 1px solid var(--border-strong);
+        color: var(--text-2);
+        background: var(--surface);
+      }
+      .spacer {
+        flex: 1;
+      }
+      .scan {
+        color: var(--text-3);
+        font-size: 12px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: var(--radius-m);
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        font-weight: 560;
+        font-size: 12.5px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .btn.ghost {
+        border-color: transparent;
+        background: transparent;
+        color: var(--text-2);
+      }
+      .btn.ink {
+        background: var(--ink);
+        color: var(--on-ink);
+        border-color: var(--ink);
+      }
+      .btn.icon-only {
+        width: 28px;
+        padding: 0;
+        justify-content: center;
+      }
+      .btn .count {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+      }
+
+      .filters {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 40px;
+        padding: 0 12px 0 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+        overflow: hidden;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 26px;
+        padding: 0 9px;
+        border-radius: 13px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-2);
+        font-size: 12.5px;
+        font-weight: 540;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .chip[aria-pressed='true'] {
+        background: var(--surface);
+        border-color: var(--border-strong);
+        color: var(--text);
+      }
+      .chip .n {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--text-3);
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex: none;
+      }
+      .seg {
+        display: inline-flex;
+        padding: 2px;
+        border-radius: var(--radius-m);
+        background: var(--surface-2);
+      }
+      .seg button {
+        border: 0;
+        background: transparent;
+        height: 22px;
+        padding: 0 8px;
+        border-radius: var(--radius-s);
+        font-size: 12px;
+        color: var(--text-2);
+        cursor: pointer;
+      }
+      .seg button[aria-pressed='true'] {
+        background: var(--surface);
+        color: var(--text);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+      }
+
+      /* Main split */
+      main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--pane, 440px);
+        min-height: 0;
+      }
+      body.detail main {
+        grid-template-columns: 264px minmax(0, 1fr);
+      }
+
+      /* Ledger list */
+      .ledger {
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        border-right: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .ledger {
+        --cols: minmax(150px, 1.25fr) minmax(120px, 1fr) repeat(7, 34px) 92px;
+      }
+      .head,
+      .row {
+        display: grid;
+        grid-template-columns: var(--cols);
+        align-items: center;
+        column-gap: 0;
+        padding: 0 12px 0 16px;
+      }
+      .head {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        height: 30px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        color: var(--text-3);
+        font-size: 11.5px;
+        font-weight: 560;
+      }
+      .head .g,
+      .row .c {
+        text-align: center;
+        font-family: var(--font-mono);
+      }
+      .head .g {
+        font-size: 12px;
+        display: grid;
+        place-items: center;
+      }
+      .head .g .icon {
+        width: 13px;
+        height: 13px;
+      }
+      .group {
+        position: sticky;
+        top: 30px;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 28px;
+        padding: 0 16px;
+        background: var(--surface-2);
+        border-bottom: 1px solid var(--border);
+        font-size: 11.5px;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-2);
+      }
+      .group .n {
+        font-family: var(--font-mono);
+        font-weight: 400;
+        letter-spacing: 0;
+        color: var(--text-3);
+      }
+      .row {
+        position: relative;
+        height: 34px;
+        border-bottom: 1px solid var(--border);
+        cursor: default;
+      }
+      body.comfortable .row {
+        height: 46px;
+      }
+      .row::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--rail, transparent);
+      }
+      .row:hover {
+        background: var(--surface-2);
+      }
+      .row[aria-selected='true'] {
+        background: var(--surface-3);
+      }
+      .row[aria-selected='true'] .name {
+        font-weight: 700;
+      }
+      .who {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-width: 0;
+      }
+      .name {
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .branch {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--text-3);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .wt {
+        font-size: 10.5px;
+        font-weight: 600;
+        padding: 0 4px;
+        border-radius: 3px;
+        border: 1px solid var(--border-strong);
+        color: var(--text-2);
+        white-space: nowrap;
+      }
+      .state {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12.5px;
+        font-weight: 560;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+      }
+      .state .icon {
+        width: 13px;
+        height: 13px;
+      }
+      .state .tx-s {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .state .more {
+        color: var(--text-3);
+        font-weight: 400;
+      }
+      .c {
+        font-size: 12px;
+        color: var(--text);
+      }
+      .c.z {
+        color: var(--text-3);
+      }
+      .when {
+        text-align: right;
+        font-size: 12px;
+        color: var(--text-3);
+        white-space: nowrap;
+      }
+      .t-risk {
+        color: var(--risk-text);
+      }
+      .t-change {
+        color: var(--change-text);
+      }
+      .t-sync {
+        color: var(--sync-text);
+      }
+      .t-branch {
+        color: var(--branch-text);
+      }
+      .t-clean {
+        color: var(--clean-text);
+      }
+
+      /* Narrow list in detail view */
+      body.detail .ledger {
+        --cols: minmax(0, 1fr) 70px;
+      }
+      body.detail .head {
+        display: none;
+      }
+      body.detail .group {
+        top: 0;
+      }
+      body.detail .row .c,
+      body.detail .row .when {
+        display: none;
+      }
+      body.detail .row .state {
+        justify-content: flex-end;
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+      }
+      body.detail .row .branch,
+      body.detail .row .wt {
+        display: none;
+      }
+
+      /* Detail pane */
+      .pane {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        min-height: 0;
+        background: var(--bg);
+      }
+      .pane-head {
+        padding: 16px 20px 12px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .title-row h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 720;
+        letter-spacing: -0.02em;
+      }
+      .ref {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        padding: 2px 7px;
+        border-radius: var(--radius-s);
+        background: var(--surface-2);
+        color: var(--text);
+      }
+      .ref .icon {
+        width: 12px;
+        height: 12px;
+        color: var(--text-3);
+      }
+      .path {
+        margin-top: 4px;
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        color: var(--text-3);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .tabs {
+        display: flex;
+        gap: 2px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .tab {
+        position: relative;
+        border: 0;
+        background: none;
+        height: 36px;
+        padding: 0 8px;
+        color: var(--text-2);
+        font-weight: 560;
+        font-size: 12.5px;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .tab .n {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-3);
+        margin-left: 4px;
+      }
+      .tab[aria-selected='true'] {
+        color: var(--text);
+      }
+      .tab[aria-selected='true']::after {
+        content: '';
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: -1px;
+        height: 2px;
+        background: var(--ink);
+      }
+      .pane-body {
+        min-height: 0;
+        overflow: auto;
+        padding: 14px 20px 20px;
+      }
+      .attention {
+        display: grid;
+        margin: 12px 0 0;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--border);
+      }
+      .attention li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 30px;
+        border-bottom: 1px solid var(--border);
+      }
+      .attention li:last-child {
+        border-bottom: 0;
+      }
+      .attention li .label {
+        flex: 1;
+        font-weight: 560;
+      }
+      .attention li .hint {
+        color: var(--text-3);
+        font-size: 12px;
+      }
+      .link {
+        border: 0;
+        background: none;
+        padding: 0;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 12.5px;
+        text-decoration: underline;
+        text-decoration-color: var(--border-strong);
+        text-underline-offset: 3px;
+        cursor: pointer;
+      }
+      .section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 4px 0 6px;
+        font-size: 11.5px;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-2);
+      }
+      .files {
+        margin: 0 0 14px;
+        padding: 0;
+        list-style: none;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-m);
+        background: var(--surface);
+        overflow: hidden;
+      }
+      .file {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr) auto 22px;
+        align-items: center;
+        gap: 8px;
+        height: 30px;
+        padding: 0 8px 0 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .file:last-child {
+        border-bottom: 0;
+      }
+      .file[aria-selected='true'] {
+        background: var(--surface-3);
+      }
+      .st {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 12px;
+        text-align: center;
+      }
+      .fp {
+        display: flex;
+        min-width: 0;
+        white-space: nowrap;
+        font-size: 12.5px;
+      }
+      .fp .dir {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-3);
+      }
+      .fp .base {
+        flex: none;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .delta {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        white-space: nowrap;
+      }
+      .delta .a {
+        color: var(--clean-text);
+      }
+      .delta .d {
+        color: var(--risk-text);
+      }
+      .mini {
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: var(--radius-s);
+        background: transparent;
+        color: var(--text-2);
+        cursor: pointer;
+      }
+      .commit {
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-m);
+        background: var(--surface);
+      }
+      .commit label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-2);
+      }
+      .commit .field {
+        min-height: 54px;
+        padding: 7px 9px;
+        border-radius: var(--radius-s);
+        border: 1px solid var(--border-strong);
+        background: var(--bg);
+        font-size: 13px;
+      }
+      .commit .row2 {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--text-3);
+        font-size: 12px;
+      }
+
+      /* Detail view: files column + diff */
+      .work {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        min-height: 0;
+      }
+      .work .side {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        min-height: 0;
+        border-right: 1px solid var(--border);
+      }
+      .work .side .scroll {
+        overflow: auto;
+        padding: 12px 12px 0;
+      }
+      .work .side .commit {
+        margin: 12px;
+      }
+      .diff {
+        min-height: 0;
+        overflow: auto;
+        background: var(--surface);
+      }
+      .diff-head {
+        position: sticky;
+        top: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 38px;
+        padding: 0 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+      .diff-head .btn {
+        font-family: var(--font-ui);
+      }
+      .diff-head .spacer {
+        flex: 1;
+      }
+      .hunk {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 14px;
+        background: var(--diff-hunk);
+        color: var(--text-2);
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        border-bottom: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+      }
+      .hunk span {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hunk .btn {
+        height: 22px;
+        font-family: var(--font-ui);
+        font-size: 11.5px;
+      }
+      .dl {
+        display: grid;
+        grid-template-columns: 44px 44px 18px minmax(0, 1fr);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 21px;
+      }
+      .dl .ln {
+        text-align: right;
+        padding-right: 8px;
+        color: var(--text-3);
+        user-select: none;
+      }
+      .dl .sg {
+        text-align: center;
+        color: var(--text-3);
+      }
+      .dl .tx {
+        font-variant-ligatures: none;
+        white-space: pre;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .dl.add {
+        background: var(--diff-add);
+      }
+      .dl.add .sg {
+        color: var(--clean-text);
+      }
+      .dl.del {
+        background: var(--diff-del);
+      }
+      .dl.del .sg {
+        color: var(--risk-text);
+      }
+
+      .back {
+        display: none;
+      }
+
+      footer {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 26px;
+        padding: 0 16px;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-3);
+        font-size: 11.5px;
+      }
+      footer .live {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* Small window: 1024 wide */
+      @media (max-width: 1200px) {
+        .ledger {
+          --cols: minmax(140px, 1.2fr) minmax(110px, 1fr) repeat(7, 30px);
+        }
+        .when,
+        .head .h-when {
+          display: none;
+        }
+        main {
+          --pane: 384px;
+        }
+        .filters .chip.opt {
+          display: none;
+        }
+        body.detail main {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        body.detail .ledger {
+          display: none;
+        }
+        body.detail .back {
+          display: inline-flex;
+        }
+        .work {
+          grid-template-columns: 260px minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <div class="brand"><span class="brand-mark"><i></i></span>Repowatch</div>
+      <div class="search" role="search">
+        <span id="search-icon"></span><span>Search repositories, branches, actions</span><kbd>Ctrl K</kbd>
+      </div>
+      <div class="spacer"></div>
+      <span class="scan" id="scan" aria-live="polite">Scanned 12 s ago</span>
+      <button class="btn" type="button" id="rescan"></button>
+      <button class="btn ghost icon-only" type="button" aria-label="Settings" id="settings"></button>
+    </header>
+    <nav class="filters" aria-label="Filters" id="filters"></nav>
+    <main id="main"></main>
+    <footer>
+      <span class="live" id="watch"></span>
+      <span>3 roots</span>
+      <span>Background fetch off</span>
+      <span class="spacer"></span>
+      <span>Sorted by needs attention</span>
+    </footer>
+
+    <script src="shared/data.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        const { icon, esc, issues, category, sorted, summary, CATEGORIES, detail } = RW;
+        const view = RW.view();
+        document.body.classList.toggle('detail', view === 'detail');
+        const sum = summary();
+
+        document.getElementById('search-icon').outerHTML = icon('search');
+        document.getElementById('rescan').innerHTML = icon('refresh') + 'Rescan';
+        document.getElementById('settings').innerHTML = icon('settings');
+        document.getElementById('watch').innerHTML =
+          '<span class="dot" style="background: var(--clean)"></span>Watching for changes';
+
+        const chip = (label, n, pressed, cat, opt) =>
+          `<button class="chip${opt ? ' opt' : ''}" type="button" aria-pressed="${pressed}">` +
+          (cat ? `<span class="dot" style="background: var(--${cat})"></span>` : '') +
+          `${label}<span class="n">${n}</span></button>`;
+        document.getElementById('filters').innerHTML =
+          chip('All', sum.total, false) +
+          chip('Needs attention', sum.attention, true) +
+          chip('At risk', sum.counts.risk, false, 'risk') +
+          chip('Uncommitted', sum.counts.change, false, 'change') +
+          chip('Out of sync', sum.counts.sync, false, 'sync') +
+          chip('Loose ends', sum.counts.branch, false, 'branch', true) +
+          '<span class="spacer"></span>' +
+          '<div class="seg" role="group" aria-label="Density"><button type="button" aria-pressed="true">Compact</button><button type="button" aria-pressed="false">Comfortable</button></div>';
+
+        const SELECTED = 'forja';
+        function counts(r) {
+          const cell = (n) => (n ? `<span class="c">${n}</span>` : '<span class="c z">·</span>');
+          return (
+            cell(r.staged) +
+            cell(r.unstaged) +
+            cell(r.untracked) +
+            cell(r.ahead) +
+            cell(r.behind) +
+            cell(r.unmerged.length) +
+            cell(r.stashes)
+          );
+        }
+        function stateCell(r) {
+          const cat = category(r);
+          const list = issues(r);
+          if (!list.length) {
+            return `<span class="state t-clean">${icon('check')}Clean</span>`;
+          }
+          const first = list.find((i) => i.cat === cat);
+          const more = list.length - 1;
+          if (view === 'detail') {
+            return `<span class="state t-${cat}" title="${esc(first.text)}">${icon(RW.ISSUE_ICON[first.key])}${first.n ?? ''}${more ? `<span class="more">+${more}</span>` : ''}</span>`;
+          }
+          return `<span class="state t-${cat}">${icon(RW.ISSUE_ICON[first.key])}<span class="tx-s">${esc(first.text)}</span>${more ? `<span class="more">+${more}</span>` : ''}</span>`;
+        }
+        function row(r) {
+          const cat = category(r);
+          const selected = r.name === SELECTED && !r.worktreeOf;
+          const rail = cat === 'clean' ? 'transparent' : `var(--${cat})`;
+          const branch = r.detached ? 'HEAD 41d7e09' : r.branch;
+          return (
+            `<div class="row" role="row" aria-selected="${selected}" style="--rail: ${rail}">` +
+            `<span class="who"><span class="name">${esc(r.name)}</span>` +
+            (r.worktreeOf ? '<span class="wt">worktree</span>' : '') +
+            `<span class="branch">${esc(branch)}</span></span>` +
+            stateCell(r) +
+            counts(r) +
+            `<span class="when">${esc(r.last.ago)}</span></div>`
+          );
+        }
+        const groups = {};
+        sorted().forEach((r) => (groups[category(r)] = groups[category(r)] || []).push(r));
+        let list =
+          '<section class="ledger" aria-label="Repositories"><div class="head" role="row">' +
+          '<span>Repository</span><span>State</span>' +
+          '<span class="g" title="Staged files" aria-label="Staged">A</span>' +
+          '<span class="g" title="Modified files" aria-label="Modified">M</span>' +
+          '<span class="g" title="Untracked files" aria-label="Untracked">?</span>' +
+          '<span class="g" title="Commits to push" aria-label="Ahead">↑</span>' +
+          '<span class="g" title="Commits to pull" aria-label="Behind">↓</span>' +
+          `<span class="g" title="Branches not merged" aria-label="Unmerged branches">${icon('branch')}</span>` +
+          `<span class="g" title="Stashes" aria-label="Stashes">${icon('stash')}</span>` +
+          '<span class="h-when" style="text-align:right">Last commit</span></div>';
+        Object.keys(CATEGORIES).forEach((cat) => {
+          if (!groups[cat]) return;
+          list +=
+            `<div class="group"><span class="dot" style="background: var(--${cat})"></span>` +
+            `${CATEGORIES[cat].label}<span class="n">${groups[cat].length}</span></div>`;
+          list += groups[cat].map(row).join('');
+        });
+        list += '</section>';
+
+        const r = RW.repos[0];
+        const staged = detail.files.filter((f) => f.staged);
+        const unstaged = detail.files.filter((f) => !f.staged);
+        const stClass = () => 't-change';
+        function fileRow(f, selected) {
+          const parts = f.path.split('/');
+          const base = parts.pop();
+          const dir = parts.length ? parts.join('/') + '/' : '';
+          return (
+            `<li class="file" aria-selected="${!!selected}"><span class="st ${stClass(f.status)}" title="${f.status === '?' ? 'Untracked' : 'Modified'}">${f.status}</span>` +
+            `<span class="fp"><span class="dir">${esc(dir)}</span><span class="base">${esc(base)}</span></span>` +
+            `<span class="delta"><span class="a">+${f.add}</span> <span class="d">−${f.del}</span></span>` +
+            `<button class="mini" type="button" aria-label="${f.staged ? 'Unstage' : 'Stage'} ${esc(f.path)}">${icon(f.staged ? 'minus' : 'plus')}</button></li>`
+          );
+        }
+        const head =
+          '<div class="pane-head"><div class="title-row">' +
+          `<button class="btn ghost icon-only back" type="button" aria-label="All repositories">${icon('back')}</button>` +
+          `<h1>${esc(r.name)}</h1><span class="ref">${icon('branch')}main</span>` +
+          `<span class="ref t-sync">${icon('up')}2 to push</span></div>` +
+          `<div class="path">${esc(r.path)}</div>` +
+          '<div class="actions">' +
+          `<button class="btn" type="button">${icon('fetch')}Fetch</button>` +
+          `<button class="btn" type="button">${icon('down')}Pull</button>` +
+          `<button class="btn ink" type="button">${icon('up')}Push<span class="count">2</span></button>` +
+          '<span class="spacer"></span>' +
+          `<button class="btn ghost icon-only" type="button" aria-label="Open in VS Code">${icon('code')}</button>` +
+          `<button class="btn ghost icon-only" type="button" aria-label="Open in terminal">${icon('terminal')}</button>` +
+          `<button class="btn ghost icon-only" type="button" aria-label="Open in Explorer">${icon('folder')}</button>` +
+          '</div></div>' +
+          '<div class="tabs" role="tablist">' +
+          `<button class="tab" role="tab" aria-selected="true">Changes<span class="n">6</span></button>` +
+          `<button class="tab" role="tab" aria-selected="false">Branches<span class="n">4</span></button>` +
+          `<button class="tab" role="tab" aria-selected="false">Stashes<span class="n">1</span></button>` +
+          `<button class="tab" role="tab" aria-selected="false">Lost commits<span class="n">2</span></button>` +
+          '</div>';
+        const commitBox =
+          '<div class="commit"><label for="msg">Commit message</label>' +
+          '<div class="field" id="msg">Pass review timeout and snapshot to reviewers</div>' +
+          `<div class="row2"><span>2 files staged</span><button class="btn ink" type="button">${icon('check')}Commit</button></div></div>`;
+
+        let pane;
+        if (view === 'dashboard') {
+          const attn = issues(r)
+            .map(
+              (i) =>
+                `<li>${icon(RW.ISSUE_ICON[i.key], 't-' + i.cat)}<span class="label t-${i.cat}">${esc(i.text)}</span>` +
+                `<button class="link" type="button">${{ staged: 'Commit', unstaged: 'Review', untracked: 'Review', ahead: 'Push', unmerged: 'Branches', stashes: 'Stashes' }[i.key] || 'Open'}</button></li>`,
+            )
+            .join('');
+          pane =
+            '<section class="pane" aria-label="Repository forja">' +
+            head.replace('</div></div><div class="tabs"', '</div><ul class="attention" aria-label="Needs attention">' + attn + '</ul></div><div class="tabs"') +
+            '<div class="pane-body">' +
+            `<div class="section"><span>Staged · ${staged.length}</span><button class="link" type="button">Unstage all</button></div>` +
+            '<ul class="files">' +
+            staged.map((f) => fileRow(f)).join('') +
+            '</ul>' +
+            `<div class="section"><span>Changes · ${unstaged.length}</span><button class="link" type="button">Stage all</button></div>` +
+            '<ul class="files">' +
+            unstaged.map((f) => fileRow(f)).join('') +
+            '</ul>' +
+            commitBox +
+            '</div></section>';
+        } else {
+          const d = detail.diff;
+          let diff =
+            `<div class="diff" aria-label="Diff of ${esc(d.file)}"><div class="diff-head">${esc(d.file)}` +
+            '<span class="delta"><span class="a">+41</span> <span class="d">−17</span></span><span class="spacer"></span>' +
+            `<button class="btn" type="button">${icon('plus')}Stage file</button></div>`;
+          d.hunks.forEach((h) => {
+            diff += `<div class="hunk"><span>${esc(h.header)}</span><button class="btn" type="button">Stage hunk</button></div>`;
+            h.lines.forEach(([s, o, n, t]) => {
+              const cls = s === '+' ? ' add' : s === '-' ? ' del' : '';
+              const sign = s === '-' ? '−' : s === '+' ? '+' : '';
+              diff += `<div class="dl${cls}"><span class="ln">${o ?? ''}</span><span class="ln">${n ?? ''}</span><span class="sg">${sign}</span><span class="tx">${esc(t)}</span></div>`;
+            });
+          });
+          diff += '</div>';
+          pane =
+            '<section class="pane" aria-label="Repository forja">' +
+            head +
+            '<div class="work"><div class="side"><div class="scroll">' +
+            `<div class="section"><span>Staged · ${staged.length}</span></div><ul class="files">` +
+            staged.map((f) => fileRow(f)).join('') +
+            `</ul><div class="section"><span>Changes · ${unstaged.length}</span></div><ul class="files">` +
+            unstaged.map((f) => fileRow(f, f.path === d.file)).join('') +
+            '</ul></div>' +
+            commitBox +
+            '</div>' +
+            diff +
+            '</div></section>';
+        }
+        document.getElementById('main').innerHTML = list + pane;
+      })();
+    </script>
+  </body>
+</html>

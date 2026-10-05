@@ -1,0 +1,198 @@
+/* Window frame: title bar 44, screen, status bar 26 (DESIGN.md layout). */
+.frame {
+  display: grid;
+  grid-template-rows: 44px minmax(0, 1fr) 26px;
+  height: 100vh;
+  min-width: 0;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Title bar */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  min-width: 0;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.brand-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--ink);
+  display: grid;
+  place-items: center;
+}
+.brand-mark i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--change);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.search {
+  flex: 0 1 420px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  min-width: 160px;
+  padding: 0 8px;
+  margin-left: 12px;
+  border-radius: var(--radius-m);
+  background: var(--surface-2);
+  color: var(--text-3);
+  border: 1px solid transparent;
+}
+.search:focus-within {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.search input::placeholder {
+  color: var(--text-3);
+}
+.search input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+.search:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.scan {
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.btn[aria-disabled='true'] {
+  color: var(--text-3);
+  cursor: default;
+}
+.btn[aria-pressed='true'].icon-only {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.icon.spin {
+  animation: spin 1.2s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Banners: errors that keep the current content on screen. */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 6px 12px 6px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--risk-tint);
+  color: var(--text);
+  font-size: 12.5px;
+}
+.banner strong {
+  font-weight: 650;
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.strong {
+  font-weight: 650;
+}
+.quiet {
+  color: var(--text-3);
+}
+.small {
+  font-size: 12px;
+}
+
+/* Status bar */
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.live-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Title bar "Commands" button: opens the command palette. */
+.btn.cmdk {
+  gap: 8px;
+  color: var(--text-2);
+}
+.cmdk .keys {
+  display: inline-flex;
+  gap: 3px;
+}
+.cmdk kbd {
+  font-size: 10.5px;
+  padding: 0 4px;
+}
+
+/* Status bar shortcut hint */
+.statusbar-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-3);
+  font-size: 11.5px;
+}
+.statusbar-keys:hover {
+  color: var(--text);
+}
+.statusbar-keys kbd {
+  font-size: 10.5px;
+  padding: 0 4px;
+}
+.statusbar-keys:focus-visible {
+  outline-offset: 0;
+}

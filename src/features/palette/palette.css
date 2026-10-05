@@ -1,0 +1,240 @@
+/* Command palette and the shortcuts sheet: floating layers (DESIGN.md
+   "Command palette", Motion: 140 ms opacity + 4 px rise). */
+.palette,
+.sheet {
+  width: min(560px, calc(100vw - 48px));
+  margin: 12vh auto auto;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+}
+.palette[open],
+.sheet[open] {
+  display: flex;
+  flex-direction: column;
+  animation: layer-in 140ms var(--ease);
+}
+.palette::backdrop,
+.sheet::backdrop {
+  background: rgb(14 16 20 / 28%);
+  animation: backdrop-in 140ms var(--ease);
+}
+:root[data-theme='dark'] .palette::backdrop,
+:root[data-theme='dark'] .sheet::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+@keyframes layer-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.palette {
+  max-height: min(520px, calc(100vh - 24vh));
+}
+.palette-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-3);
+  flex: none;
+}
+/* The field is the dialog's only tab stop; an ink underline marks its focus. */
+.palette-field:focus-within {
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+.palette-field .icon {
+  width: 16px;
+  height: 16px;
+}
+.palette-field input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+}
+.palette-field input::placeholder {
+  color: var(--text-3);
+}
+.palette-list {
+  overflow-y: auto;
+  padding: 4px 6px 6px;
+  min-height: 0;
+}
+.palette-group {
+  padding: 10px 8px 4px;
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.palette-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  min-width: 0;
+}
+.palette-option[aria-selected='true'] {
+  background: var(--surface-3);
+}
+/* The highlighted option carries an ink bar, so it reads as focus, not only a tint. */
+.palette-option[aria-selected='true']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+.palette-option .icon {
+  color: var(--text-2);
+}
+.palette-option .icon.t-risk {
+  color: var(--risk-text);
+}
+.palette-option .icon.t-change {
+  color: var(--change-text);
+}
+.palette-option .icon.t-sync {
+  color: var(--sync-text);
+}
+.palette-option .icon.t-branch {
+  color: var(--branch-text);
+}
+.palette-option .icon.t-clean {
+  color: var(--clean-text);
+}
+.palette-label {
+  font-weight: 560;
+  white-space: nowrap;
+}
+.palette-option[aria-selected='true'] .palette-label {
+  font-weight: 650;
+}
+.palette-detail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-3);
+  font-size: 12px;
+}
+.g-repos .palette-detail {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-variant-ligatures: none;
+}
+.palette-meta {
+  flex: none;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.palette-keys {
+  display: inline-flex;
+  gap: 3px;
+  flex: none;
+}
+.palette-empty {
+  padding: 18px 10px;
+  color: var(--text-2);
+}
+.palette-foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 11.5px;
+  flex: none;
+}
+.palette-foot kbd {
+  margin-right: 2px;
+}
+
+/* Shortcuts sheet */
+.sheet {
+  max-height: min(640px, calc(100vh - 24vh));
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 10px 18px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.sheet-head h2 {
+  font-size: 15px;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+}
+.shortcuts-body {
+  overflow-y: auto;
+  padding: 0 18px 16px;
+}
+.shortcuts dl {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+}
+.shortcuts dl > div {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.shortcuts dl > div:last-child {
+  border-bottom: 0;
+}
+.shortcuts dt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.shortcuts dd {
+  margin: 0;
+  color: var(--text-2);
+}
+.combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.combo .or {
+  margin: 0 3px 0 1px;
+  color: var(--text-3);
+  font-size: 11.5px;
+}

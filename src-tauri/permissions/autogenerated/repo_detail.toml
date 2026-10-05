@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-repo-detail"
+description = "Enables the repo_detail command without any pre-configured scope."
+commands.allow = ["repo_detail"]
+
+[[permission]]
+identifier = "deny-repo-detail"
+description = "Denies the repo_detail command without any pre-configured scope."
+commands.deny = ["repo_detail"]

@@ -1,0 +1,37 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The main window may listen to app events and call the Repowatch commands, nothing else: no file system, shell, opener, window or plugin APIs.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "allow-app-info",
+    "allow-get-settings",
+    "allow-update-settings",
+    "allow-get-status",
+    "allow-get-snapshot",
+    "allow-scan",
+    "allow-repo-detail",
+    "allow-file-diff",
+    "allow-lost-commits",
+    "allow-stage-file",
+    "allow-unstage-file",
+    "allow-stage-hunk",
+    "allow-unstage-hunk",
+    "allow-commit",
+    "allow-fetch",
+    "allow-pull",
+    "allow-push",
+    "allow-create-branch",
+    "allow-switch-branch",
+    "allow-delete-branch",
+    "allow-apply-stash",
+    "allow-drop-stash",
+    "allow-recover-commit",
+    "allow-open-repo",
+    "allow-pick-folder"
+  ]
+}

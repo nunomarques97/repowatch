@@ -1,0 +1,19 @@
+[package]
+name = "repowatch-core"
+description = "Git repository discovery and status analysis for Repowatch (no UI dependencies)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1"
+
+[lints]
+workspace = true

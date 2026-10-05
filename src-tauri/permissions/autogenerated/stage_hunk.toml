@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-stage-hunk"
+description = "Enables the stage_hunk command without any pre-configured scope."
+commands.allow = ["stage_hunk"]
+
+[[permission]]
+identifier = "deny-stage-hunk"
+description = "Denies the stage_hunk command without any pre-configured scope."
+commands.deny = ["stage_hunk"]

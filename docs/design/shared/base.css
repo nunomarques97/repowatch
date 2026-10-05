@@ -1,0 +1,188 @@
+/*
+ * Shared base for the three Repowatch design mocks.
+ * Fonts come from the project's npm dependencies (both SIL OFL 1.1), so the
+ * mocks must be served from the repository root (npm run design:check does).
+ */
+@font-face {
+  font-family: 'Hanken Grotesk Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  src: url('/node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2')
+    format('woff2-variations');
+}
+@font-face {
+  font-family: 'Commit Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/node_modules/@fontsource/commit-mono/files/commit-mono-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Commit Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('/node_modules/@fontsource/commit-mono/files/commit-mono-latin-600-normal.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: light;
+  --font-ui: 'Hanken Grotesk Variable', 'Segoe UI Variable Text', system-ui, sans-serif;
+  --font-mono: 'Commit Mono', 'Cascadia Mono', Consolas, monospace;
+
+  /* Neutrals: the chrome is monochrome, colour is reserved for state. */
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --surface-3: #e6e9ee;
+  --border: #e1e5ea;
+  --border-strong: #cbd1d9;
+  --text: #14171c;
+  --text-2: #4a515c;
+  --text-3: #5b636f;
+  --ink: #14171c;
+  --on-ink: #ffffff;
+
+  /* State colours: solid (dots, rails: >= 3:1 on bg, never the only signal), text (>= 4.5:1), tint (chip background). */
+  --clean: #2e9e5b;
+  --clean-text: #1d7543;
+  --clean-tint: #e3f4ea;
+  --change: #c47c06;
+  --change-text: #8f520a;
+  --change-tint: #fbf0dc;
+  --sync: #2f7fd8;
+  --sync-text: #1d5ca9;
+  --sync-tint: #e3eefb;
+  --branch: #8a5bd6;
+  --branch-text: #6a3db6;
+  --branch-tint: #efe8fb;
+  --risk: #dd4a3a;
+  --risk-text: #b02e21;
+  --risk-tint: #fce8e5;
+  --none: #8a93a0;
+  --danger: #b02e21;
+  --on-danger: #ffffff;
+
+  --diff-add: #e4f4ea;
+  --diff-del: #fbe9e6;
+  --diff-hunk: #eef1f6;
+
+  --radius-s: 4px;
+  --radius-m: 6px;
+  --radius-l: 10px;
+  --shadow-pop: 0 1px 2px rgb(20 23 28 / 6%), 0 8px 24px rgb(20 23 28 / 10%);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0e1014;
+    --surface: #14171c;
+    --surface-2: #1b1f26;
+    --surface-3: #242932;
+    --border: #262b33;
+    --border-strong: #353b46;
+    --text: #e8ebef;
+    --text-2: #b4bbc6;
+    --text-3: #8c95a2;
+    --ink: #e8ebef;
+    --on-ink: #0e1014;
+
+    --clean: #3fbf74;
+    --clean-text: #6fd49a;
+    --clean-tint: #13261c;
+    --change: #e9a23b;
+    --change-text: #f1b866;
+    --change-tint: #2b2113;
+    --sync: #4c9af0;
+    --sync-text: #86b9f5;
+    --sync-tint: #14223a;
+    --branch: #a27cf0;
+    --branch-text: #c2a8f7;
+    --branch-tint: #221a38;
+    --risk: #f0604f;
+    --risk-text: #f5918a;
+    --risk-tint: #351815;
+    --none: #6b7482;
+    --danger: #f5918a;
+    --on-danger: #0e1014;
+
+    --diff-add: #11261a;
+    --diff-del: #31181a;
+    --diff-hunk: #18202c;
+
+    --shadow-pop: 0 1px 2px rgb(0 0 0 / 40%), 0 12px 32px rgb(0 0 0 / 45%);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum';
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.mono,
+code,
+kbd {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-variant-ligatures: none;
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-s);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

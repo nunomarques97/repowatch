@@ -1,0 +1,706 @@
+/* Repository view (DESIGN.md "Detail header", "Tabs", "File row", "Diff
+   viewer", "Commit box", "Confirmation dialog"). The list narrows to a 264 px
+   rail; below 1200 px it hides and the back button returns to it. */
+
+.split.with-detail {
+  grid-template-columns: 264px minmax(0, 1fr);
+}
+
+/* The rail: name, state icon and count. */
+.with-detail .ledger {
+  --cols: minmax(0, 1fr) auto;
+}
+.with-detail .ledger-head,
+.with-detail .row .c,
+.with-detail .row .when,
+.with-detail .row .branch,
+.with-detail .row .wt,
+.with-detail .row .state .tx {
+  display: none;
+}
+.with-detail .group-head,
+.with-detail .progress {
+  top: 0;
+}
+.with-detail .row {
+  scroll-margin-top: 28px;
+}
+.with-detail .row .state {
+  padding-right: 0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+.row .rn {
+  display: none;
+}
+.with-detail .row .rn {
+  display: inline;
+}
+
+/* The pane: header, tabs, then the tab's own scrolling areas. */
+.pane.detail {
+  overflow: hidden;
+}
+.pane.detail .back {
+  margin-left: -6px;
+}
+.pane.detail h1:focus-visible {
+  outline-offset: 2px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  min-width: 0;
+}
+.btn .count {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.btn.ink[aria-disabled='true'],
+.btn.ink[aria-disabled='true']:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text-3);
+  opacity: 1;
+}
+
+/* What the running or last action did. */
+.activity {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 6px 6px 6px 10px;
+  border-radius: var(--radius-m);
+  background: var(--surface-2);
+  font-size: 12.5px;
+  line-height: 18px;
+  animation: layer-in 180ms var(--ease);
+}
+.activity .icon {
+  margin-top: 2px;
+}
+.activity[data-state='pending'] {
+  padding-right: 10px;
+  color: var(--text-2);
+}
+.activity[data-state='ok'] {
+  background: var(--clean-tint);
+}
+.activity[data-state='error'] {
+  background: var(--risk-tint);
+}
+.activity .btn.icon-only {
+  width: 22px;
+  height: 22px;
+  margin: -2px 0;
+}
+.activity .btn.ghost {
+  color: var(--text);
+}
+.activity .btn.ghost:hover {
+  background: transparent;
+}
+.git-error {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 72px;
+  overflow-y: auto;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex: none;
+}
+.tab {
+  position: relative;
+  border: 0;
+  background: none;
+  height: 36px;
+  padding: 0 8px;
+  color: var(--text-2);
+  font-weight: 560;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab .n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  margin-left: 5px;
+}
+.tab[aria-selected='true'] {
+  color: var(--text);
+}
+.tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ink);
+}
+.tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.tab-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 20px 20px;
+}
+.tab-body > .section:first-child {
+  margin-top: 0;
+}
+.tab-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+  color: var(--text-2);
+}
+.detail-loading {
+  padding: 20px;
+}
+.detail-error {
+  display: flex;
+  gap: 10px;
+  margin: 16px 20px;
+  padding: 10px 12px;
+  border-radius: var(--radius-m);
+  background: var(--risk-tint);
+}
+.detail-error .icon {
+  margin-top: 3px;
+}
+.detail-error pre {
+  margin: 4px 0 10px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.inline-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 12px 0;
+  padding: 6px 8px 6px 12px;
+  border-radius: var(--radius-m);
+  background: var(--risk-tint);
+  font-size: 12.5px;
+}
+.tab-body > .inline-error {
+  margin: 0 0 12px;
+}
+.inline-error .mono {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* Changes: files and commit box beside the diff. */
+.work {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+.work .side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+}
+.work .scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 12px 4px;
+}
+.file-group .section {
+  margin: 0 0 6px;
+}
+.file-group + .file-group .section {
+  margin-top: 14px;
+}
+.files {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  overflow: hidden;
+}
+.file {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 6px 0 10px;
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+  transition: background-color 120ms var(--ease);
+}
+.file:last-child {
+  border-bottom: 0;
+}
+.file:hover {
+  background: var(--surface-2);
+}
+.file[aria-selected='true'] {
+  background: var(--surface-3);
+}
+.file:focus-visible {
+  outline-offset: -2px;
+  border-radius: 0;
+}
+.st {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+}
+.fp {
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+.fp .dir {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-3);
+}
+.fp .base {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file[aria-selected='true'] .base {
+  font-weight: 600;
+}
+.mini {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-2);
+}
+.mini:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+.mini[aria-disabled='true'] {
+  color: var(--text-3);
+  cursor: default;
+}
+
+.commit {
+  display: grid;
+  gap: 8px;
+  margin: 8px 12px 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  flex: none;
+}
+.commit label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.commit .field {
+  resize: vertical;
+  min-height: 56px;
+  max-height: 200px;
+  padding: 7px 9px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  font-size: 13px;
+  line-height: 19px;
+}
+.commit .field::placeholder,
+.input::placeholder {
+  color: var(--text-3);
+}
+.commit .field:focus-visible,
+.input:focus-visible {
+  outline-offset: 0;
+  border-radius: var(--radius-s);
+}
+.commit .row2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+/* Diff viewer: the header stays, the lines scroll both ways and never wrap. */
+.diff {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface);
+}
+.diff-empty {
+  display: grid;
+  place-items: center;
+}
+.diff-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px 0 14px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.diff-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+}
+.diff-side {
+  flex: none;
+  font-size: 11.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.delta {
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.delta .a {
+  color: var(--clean-text);
+}
+.delta .d {
+  color: var(--risk-text);
+}
+.diff-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.diff-body:focus-visible {
+  outline-offset: -2px;
+  border-radius: 0;
+}
+.diff-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 14px;
+}
+.diff-note[role='alert'] {
+  margin: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-m);
+  background: var(--risk-tint);
+}
+.lines {
+  width: max-content;
+  min-width: 100%;
+  padding-bottom: 8px;
+}
+.hunk {
+  position: sticky;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  padding: 3px 12px 3px 14px;
+  background: var(--diff-hunk);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+.hunk-block:first-child .hunk {
+  border-top: 0;
+}
+.hunk-head {
+  flex: 1;
+  white-space: pre;
+}
+.hunk .btn {
+  height: 22px;
+  padding: 0 8px;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+}
+.dl {
+  display: grid;
+  grid-template-columns: 44px 44px 18px max-content;
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  font-feature-settings: normal;
+  font-size: 12px;
+  line-height: 21px;
+}
+.dl .ln {
+  text-align: right;
+  padding-right: 8px;
+  color: var(--text-3);
+  user-select: none;
+}
+.dl .sg {
+  text-align: center;
+  color: var(--text-3);
+  user-select: none;
+}
+.dl .tx {
+  white-space: pre;
+  padding-right: 16px;
+}
+.dl.add {
+  background: var(--diff-add);
+}
+.dl.add .sg {
+  color: var(--clean-text);
+}
+.dl.del {
+  background: var(--diff-del);
+}
+.dl.del .sg {
+  color: var(--risk-text);
+}
+.dl.nonl .tx {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* Branches, stashes, lost commits, worktrees: rows with their actions. */
+.items li {
+  gap: 10px;
+  padding: 6px 8px 6px 10px;
+}
+.items .item-main {
+  display: grid;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+.name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 12.5px;
+}
+.name-line .mono {
+  font-size: 12px;
+  flex: none;
+}
+.name-line .ellipsis {
+  min-width: 0;
+}
+.meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: 12px;
+  color: var(--text-3);
+  min-width: 0;
+}
+.meta-line .mono {
+  font-size: 11.5px;
+}
+.items li[aria-current='true'] .name-line {
+  font-weight: 650;
+}
+.tag {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 0 5px;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  line-height: 15px;
+}
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+.item-actions .btn {
+  height: 26px;
+}
+.tab-body .facts + .small,
+.tab-body .facts + .section {
+  margin-top: 10px;
+}
+.tab-body .facts + .section {
+  margin-top: 18px;
+}
+
+.inline-form {
+  display: grid;
+  gap: 6px;
+  max-width: 560px;
+  margin-bottom: 16px;
+}
+.inline-form label,
+.confirm-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.inline-row {
+  display: flex;
+  gap: 8px;
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 12.5px;
+}
+.input:disabled {
+  background: var(--surface-2);
+}
+.input[aria-invalid='true'] {
+  border-color: var(--risk);
+}
+.lost-intro {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: var(--text-2);
+  max-width: 640px;
+}
+
+/* Confirmation dialog */
+.confirm {
+  width: min(460px, calc(100vw - 48px));
+  margin: 18vh auto auto;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+}
+.confirm[open] {
+  animation: layer-in 140ms var(--ease);
+}
+.confirm::backdrop {
+  background: rgb(14 16 20 / 28%);
+  animation: backdrop-in 140ms var(--ease);
+}
+:root[data-theme='dark'] .confirm::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+.confirm form {
+  display: grid;
+  gap: 10px;
+  padding: 18px 18px 16px;
+}
+.confirm-title {
+  font-size: 15px;
+  line-height: 21px;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.confirm-body {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 19px;
+  overflow-wrap: anywhere;
+}
+.confirm-field {
+  display: grid;
+  gap: 6px;
+}
+.confirm-field .input {
+  height: 30px;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+.btn.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--on-danger);
+}
+.btn.danger:hover:not(:disabled) {
+  background: var(--danger);
+  opacity: 0.9;
+}
+.btn.danger[aria-disabled='true'] {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text-3);
+  opacity: 1;
+}
+
+@media (max-width: 1200px) {
+  /* The list is hidden, so are its filters. */
+  .screen:has(.with-detail) .filters {
+    display: none;
+  }
+  .split.with-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .with-detail .ledger {
+    display: none;
+  }
+  .work {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activity {
+    animation: none;
+  }
+}
